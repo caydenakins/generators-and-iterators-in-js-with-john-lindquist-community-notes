@@ -2,7 +2,7 @@
 ## General Notes
 
 The cool thing here is that the generator features of Javascript, they clean up
-the syntax and give you a differnt more incise syntax to work with, it's just
+the syntax and give you a different more incise syntax to work with, it's just
 that it's hiding everything behind the ??????.
 
 When you remove the iterator from an array, you can't loop through it. It

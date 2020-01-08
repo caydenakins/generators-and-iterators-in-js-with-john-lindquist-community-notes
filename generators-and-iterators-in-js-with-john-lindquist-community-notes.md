@@ -5,15 +5,20 @@ An iterator is something you loop through, you can use it to loop through
 arrays.
 
 The generator features of Javascript are cool because they clean up syntax and
-give you a different, more incise **precise?** syntax to work with - it hides
-everything behind the **??**.
+give you a different, more precise syntax to work with - it hides
+everything behind the inner workings.
 
 You can use iterators to loop through arrays. But, when you remove the iterator
 from an array, you can't loop through it. The array becomes 'uniterable',
 shutting down its ability to loop.
 
 Generators are not just control flow, they can handle mapping, filtering, and
-many other array things.
+many other array things. A huge benefit of generators is they give us a chance
+to pass something in and do logic based on it.
+
+Problem solving/real life examples generators could be like if you want an event
+to run every week. You can set up a generator which you can call `next()` every
+single day and make the generator schedule something every Thursday.
 
 The legacy of generators - [tj/co](https://github.com/tj/co).
 The project is deprecated because async/await exists, and we no longer need
@@ -61,8 +66,6 @@ for (let value of iterator) {
 ```
 
 This example above has the iterator running backwards through the array.
-
-Computer property ex
 
 ```js
 ...
@@ -257,12 +260,24 @@ const iterator = function(start, end) {
   return {[Symbol.iterator]() {
     return {
       next() {
-
+        return {
+          value: start++,
+          done: start > end
+        }
       }
     }
   }}
 }
+
+function* range(start, end){
+  while (start < end) yield start++
+}
+
+console.log([...range(0, 100)])
 ```
+
+This is what we can do with a generator function. It's hiding things for us, but
+it's also extending it and giving us the ability to do things asynchronously.
 
 Generator functions are unique in the fact that they don't run to the end. You
 can think of traditional functions where you have `statement`, `expression`,
@@ -308,7 +323,9 @@ const ranges = function*(count, iteratorFactory) {
   }
 };
 
-const numbers =
+const numbers = [...ranges(3, () => range(0, 10))];
+
+console.log(numbers);
 ```
 
 `yield *` allows you to send out any iterable.
@@ -326,62 +343,66 @@ console.log([...gen()]);
 
 ## User Questions
 
-*Is iterator a built in property in arrays?*
-- Yes it is built in, see console.log
+Anonymous: *Is iterator a built in property in arrays?*
+- Yes, iterator is built in to all arrays, it is on the array prototype. See
+console.log examples: `console.log(Array.prototype[Symbol.iterator])`.
 
-*The iterator is the same in for, for of, and for in?*
-- fafafa
+Fernando Balmaceda: *The iterator is the same in for, for of, and for in?*
+- Yes, the iterators are all the same in those.
 
-*Will there be a problem with the variable outside the scope?*
+Anonymous: *Will there be a problem with the variable outside the scope?*
 - Essentially, once you start writing your own custom iterators, you can start
 encapsulating things and saying `const createIterator = function(array) {}` and
 returns an object.
 
-*Is this how these iterators actually work under the hood or is this for
-illustration?*
-- Essentially this is the API to create iterators, so I'd assume they use the same one
+Jordan Kline: *Is this how these iterators actually work under the hood or is
+this for illustration?*
+- Essentially, I don't know how the library that drives v8 is implemented. But,
+these are the contracts that they expose for you to work with. This is the API
+to create iterators, so I'd assume they use the same one internally, but they
+could be doing something different.
 
-*I'm under the impression that for loops are faster than this type of
-iterator.*
+Hrafnkell Palsson: *I'm under the impression that for loops are faster than this
+type of iterator.*
 - It's the same iterator I'd assume, unless they optimize it somehow.
 
 *Any other data structures you would typically implement an iterator on?*
-- It's a step-by-step evaluation of something.
+- Well, it's a step-by-step evaluation of something. The generator features of
+Javascript clean up the syntax and give you a more incise syntax to work with,
+it just hides everything that's going behind `yield` and the `start` function.
 
-*What's the difference between yield and return?*
-- fafafa
+Anonymous: *What's the difference between yield and return?*
+- The difference is in iterators, you'll often see `while()` loops and checking
+if things have reached a certain length and then going about their business.
 
-*With a generator you can use promises?*
+Fernando Balmaceda: *With a generator you can use promises?*
 - You can return promises, and there are things called async iterators, which
 are a bit more advanced you can look at.
 
-*Are the generators sort of state machines?*
-- Yeah, they have
-
-Fernando Balmaceda: *Generator makes a closure or something like that?*
-- w
+Hrafnkell Palsson: *Are the iterators sort of state machines?*
+- Yeah, they have internal state. And they have a context and as requested,
+give you back what you requested. It allows you to write all sorts of funky
+state machines.
 
 Robert Reed: *Is ES6 spread operator all thanks to iterators?*
 - I believe so, they needed that symbol.iterator to enable that so there was a
 hard-defined contract between iterables and what can iterate on them.
 
-David Fontz: *What does it look like if you don’t spread the range call?*
-- dwadaw
-
 David Fontz: *So the … spreads all the yields*
-- Yes, the ... spreads all the yields, or rather iterates through all the
-values and ?????????
-
-Hrafnkell Palsson: *What’s a practical example of the use for a parameter to
-the next function?*
-- fafafafa
+- Yes, the `...` spreads all the yields, that's a way of saying it. Or rather,
+it iterates through it and grabs every value your generator is pushing out.
+  - _Learner's Advocate Note_ - Example with `...`:
+  `console.log([...range(0, 100)])`
 
 David Fontz: *Should you have a return in the generator? is that best
 practice?*
 - That's something I need to investigate myself, I'm not sure if once it gets
-to return, there's probably a memory cleanup there, unless it hangs around.
+to return, there's probably a memory cleanup there, otherwise it hangs around.
 Because it wouldn't know when to stop until return is called, so it's best
-practice to leave it ?
+practice to leave it in.
 
 Hrafnkell Palsson: *So the generator saves all local state?*
-- It's
+- _Learner's Advocate Note_ - Left unanswered, but found that `There's no longer
+a need to create an object to hold the iteration state—generators automatically
+save their local state every time they yield.` via
+[this](https://eloquentjavascript.net/11_async.html) website.
